@@ -1,16 +1,30 @@
 import './App.css';
-import axios from 'axios';
-import { useState } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import Home from './pages/Home';
+import Root from './pages/Root';
+import Join from './pages/Join';
 
 function App() {
-  const [text, setText] = useState('');
-  
-  axios.get('http://localhost:8888/test').then((res) => res.json()).then((data)=>{setText(data)}).catch((e) => {console.log(e)});
 
+  const router = createBrowserRouter([
+    {
+      path : '/',
+      element : <Root />,
+      children : [
+        {
+          index: true,
+          element : <Home />
+        },
+        {
+          path : '/join',
+          element : <Join />
+        }
+      ]
+    }
+  ]);
+  
   return (
-    <div className="App">
-      {text}
-    </div>
+    <RouterProvider router={router} />
   );
 }
 
