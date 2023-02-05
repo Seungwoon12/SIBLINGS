@@ -20,15 +20,9 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-<<<<<<< HEAD
-//	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.0'
-	compileOnly 'org.projectlombok:lombok'
-//	runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
-=======
 	//implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.0'
 	compileOnly 'org.projectlombok:lombok'
 	//runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
->>>>>>> dea932aba65fb66e8ae745add1cdd97e1b6c338e
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
