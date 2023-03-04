@@ -1,6 +1,6 @@
 package hello.siblings.repository;
 
-import com.example.jwtpractice.entity.RefreshToken;
+import hello.siblings.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package hello.siblings.controller;
 
-import com.example.jwtpractice.jwt.TokenProvider;
+import hello.siblings.jwt.TokenProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.web.bind.annotation.RequestMapping;
