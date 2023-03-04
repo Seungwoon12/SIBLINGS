@@ -1,6 +1,6 @@
 package hello.siblings.jwt;
 
-import com.example.jwtpractice.dto.TokenDto;
+import hello.siblings.dto.TokenDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;

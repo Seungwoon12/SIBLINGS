@@ -1,16 +1,16 @@
 package hello.siblings.service;
 
-import com.example.jwtpractice.dto.LoginDto;
-import com.example.jwtpractice.dto.MemberDto;
-import com.example.jwtpractice.dto.TokenDto;
-import com.example.jwtpractice.entity.Authority;
-import com.example.jwtpractice.entity.Member;
-import com.example.jwtpractice.entity.RefreshToken;
-import com.example.jwtpractice.exception.NotFoundMemberException;
-import com.example.jwtpractice.jwt.TokenProvider;
-import com.example.jwtpractice.repository.MemberRepository;
-import com.example.jwtpractice.repository.RefreshTokenRepository;
-import com.example.jwtpractice.util.SecurityUtil;
+import hello.siblings.dto.LoginDto;
+import hello.siblings.dto.MemberDto;
+import hello.siblings.dto.TokenDto;
+import hello.siblings.entity.Authority;
+import hello.siblings.entity.Member;
+import hello.siblings.entity.RefreshToken;
+import hello.siblings.exception.NotFoundMemberException;
+import hello.siblings.jwt.TokenProvider;
+import hello.siblings.repository.MemberRepository;
+import hello.siblings.repository.RefreshTokenRepository;
+import hello.siblings.util.jwt.SecurityUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;

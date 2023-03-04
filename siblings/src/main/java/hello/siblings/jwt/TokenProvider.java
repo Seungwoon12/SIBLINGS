@@ -1,10 +1,10 @@
 package hello.siblings.jwt;
 
-import com.example.jwtpractice.dto.TokenDto;
-import com.example.jwtpractice.entity.Authority;
-import com.example.jwtpractice.entity.Member;
-import com.example.jwtpractice.entity.RefreshToken;
-import com.example.jwtpractice.repository.RefreshTokenRepository;
+import hello.siblings.dto.TokenDto;
+import hello.siblings.entity.Authority;
+import hello.siblings.entity.Member;
+import hello.siblings.entity.RefreshToken;
+import hello.siblings.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
