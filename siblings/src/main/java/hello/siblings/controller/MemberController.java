@@ -1,10 +1,10 @@
 package hello.siblings.controller;
 
-import com.example.jwtpractice.dto.LoginDto;
-import com.example.jwtpractice.dto.MemberDto;
-import com.example.jwtpractice.dto.TokenDto;
-import com.example.jwtpractice.jwt.TokenProvider;
-import com.example.jwtpractice.service.MemberService;
+import hello.siblings.dto.LoginDto;
+import hello.siblings.dto.MemberDto;
+import hello.siblings.dto.TokenDto;
+import hello.siblings.jwt.TokenProvider;
+import hello.siblings.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

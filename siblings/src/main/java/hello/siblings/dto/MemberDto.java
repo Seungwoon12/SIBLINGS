@@ -1,7 +1,7 @@
 package hello.siblings.dto;
 
-import com.example.jwtpractice.entity.Member;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import hello.siblings.entity.Member;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
