@@ -1,2 +1,20 @@
 server:
   port: 8888
+
+
+file:
+  dir: /C:/Users/seungwoon/Desktop/fileUpload
+
+
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521:xe
+    username: phh
+    password: phh
+    driver-class-name: oracle.jdbc.OracleDriver
+
+mybatis:
+  mapper-locations: mybatis/**/*-mapper.xml
+  type-aliases-package: hello.siblings.entity
+  configuration:
+    map-underscore-to-camel-case: true
