@@ -2,10 +2,8 @@ package hello.siblings.jwt;
 
 import hello.siblings.dto.TokenDto;
 import hello.siblings.entity.Member;
-import hello.siblings.entity.RefreshToken;
 import hello.siblings.oauth.CustomUserDetails;
 import hello.siblings.repository.MemberRepository;
-import hello.siblings.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -74,8 +72,13 @@ public class TokenProvider implements InitializingBean {
 
         Date now = new Date();
         Date accessTokenExpiration = new Date(now.getTime() + this.ACCESS_TOKEN_VALIDITY_SECONDS);
+
+        // member_id 값을 가져오기 위해 CustomUserDetails로 형변환 필요
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+
         return Jwts.builder()
                 .setSubject(authentication.getName())
+                .setId(String.valueOf(user.getId())) // member_id 컬럼 값을 넣어주기 위해 추가
                 .claim(AUTHORITIES_KEY, authorities)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .setIssuedAt(now)
@@ -137,7 +140,9 @@ public class TokenProvider implements InitializingBean {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        CustomUserDetails principal = new CustomUserDetails(Long.valueOf(claims.getSubject()), "", authorities);
+//        CustomUserDetails principal = new CustomUserDetails(Long.valueOf(claims.getSubject()), "", authorities);
+        CustomUserDetails principal = new CustomUserDetails(Long.valueOf(claims.getId()), String.valueOf(claims.getSubject()), authorities);// 이걸로 수정
+
         // credential은 유저의 password를 의미하는듯?
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }

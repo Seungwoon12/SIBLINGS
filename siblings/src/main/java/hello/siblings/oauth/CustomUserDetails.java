@@ -26,6 +26,11 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         this.authorities = authorities;
     }
 
+    public CustomUserDetails(String email, Collection<? extends GrantedAuthority> authorities, Map<String, Object> attributes) {
+        this.email = email;
+        this.authorities = authorities;
+    }
+
     public static CustomUserDetails create(Member member) {
         List<SimpleGrantedAuthority> authorities =
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));

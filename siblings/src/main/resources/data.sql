@@ -1,4 +1,4 @@
-insert into member (member_id, member_name, email, password, nickname, activated) values (1, 'admin', 'chulsoo@abc.com', '$2a$12$J3gycqXMj8Pqk9lHq5eSoufmJQNhDLlm1lzp80/aBsN2.jJqVtcZC', 'admin', 1);
+insert into member (member_name, email, password, nickname, activated) values ('admin', 'chulsoo@abc.com', '$2a$12$J3gycqXMj8Pqk9lHq5eSoufmJQNhDLlm1lzp80/aBsN2.jJqVtcZC', 'admin', 1);
 
 
 -- insert into authority (authority_name) values ('ROLE_USER');

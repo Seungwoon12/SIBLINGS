@@ -89,6 +89,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private Member createMember(OAuth2UserInfo userInfo, AuthProvider authProvider) {
         Member member = Member.builder()
                 .email(userInfo.getEmail())
+                .memberName(userInfo.getName())
                 .picture(userInfo.getImageUrl())
                 .role(MemberRole.USER)
                 .activated(true)
