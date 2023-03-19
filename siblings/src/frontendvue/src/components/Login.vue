@@ -11,9 +11,6 @@
 <script>
 export default {
     name: "Login",
-    created(){
-        console.log("확인 : "+this.url1);
-    },
     data() {
         return{
             params: {

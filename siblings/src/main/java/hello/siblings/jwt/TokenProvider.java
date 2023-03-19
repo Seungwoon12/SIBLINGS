@@ -70,6 +70,7 @@ public class TokenProvider implements InitializingBean {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
+
         Date now = new Date();
         Date accessTokenExpiration = new Date(now.getTime() + this.ACCESS_TOKEN_VALIDITY_SECONDS);
 
