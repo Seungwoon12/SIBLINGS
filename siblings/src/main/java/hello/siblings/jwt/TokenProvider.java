@@ -2,10 +2,8 @@ package hello.siblings.jwt;
 
 import hello.siblings.dto.TokenDto;
 import hello.siblings.entity.Member;
-import hello.siblings.entity.RefreshToken;
 import hello.siblings.oauth.CustomUserDetails;
 import hello.siblings.repository.MemberRepository;
-import hello.siblings.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -72,8 +70,13 @@ public class TokenProvider implements InitializingBean {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
+
         Date now = new Date();
         Date accessTokenExpiration = new Date(now.getTime() + this.ACCESS_TOKEN_VALIDITY_SECONDS);
+
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        log.info("user.getId = {}", user.getId());
+
         return Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
@@ -136,6 +139,9 @@ public class TokenProvider implements InitializingBean {
                 Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
+
+        log.info("authentication.getName() = {}", claims.getSubject());
+        log.info("authentication.getId() = {}", claims.getId());
 
         CustomUserDetails principal = new CustomUserDetails(Long.valueOf(claims.getSubject()), "", authorities);
         // credential은 유저의 password를 의미하는듯?
