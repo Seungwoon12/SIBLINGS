@@ -3,11 +3,25 @@ package hello.siblings.repository;
 import hello.siblings.entity.Member;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
+    Optional<Member> findByEmail(String email);
 
-    @EntityGraph(attributePaths = "authorities") // fetch 조인하여 authorities 정보까지 같이 조회. Lazy 조회가 아니라 Eager 조회.
-    Optional<Member> findOneWithAuthoritiesByMemberName(String memberName); //유저정보 가져올 때 권한 정보도 같이 가져오는 메소드
+    boolean existsByEmail(String email);
+
+    @Query("SELECT m.refreshToken FROM Member m WHERE m.memberId=:id")
+    String getRefreshTokenById(@Param("id") Long id);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Member m SET m.refreshToken=:token WHERE m.memberId=:id")
+    void updateRefreshToken(@Param("id") Long id, @Param("token") String token);
+
+
 }

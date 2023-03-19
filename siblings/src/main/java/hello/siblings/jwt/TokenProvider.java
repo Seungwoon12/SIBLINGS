@@ -1,17 +1,20 @@
 package hello.siblings.jwt;
 
 import hello.siblings.dto.TokenDto;
-import hello.siblings.entity.Authority;
 import hello.siblings.entity.Member;
 import hello.siblings.entity.RefreshToken;
+import hello.siblings.oauth.CustomUserDetails;
+import hello.siblings.repository.MemberRepository;
 import hello.siblings.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +22,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletResponse;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,29 +33,28 @@ import java.util.stream.Collectors;
  * TokenProvider 클래스는 토큰의 생성, 토큰의 유효성 검증등을 담당함
  */
 @Component
+@Slf4j
 public class TokenProvider implements InitializingBean {
 
-    private final Logger log = LoggerFactory.getLogger(TokenProvider.class);
-
-    private final RefreshTokenRepository refreshTokenRepository;
-
-    private static final String AUTHORITIES_KEY = "auth";
-
     private final String secret;
-    private final long accessTokenValidityInMilliseconds;
-    private final long refreshTokenValidityInMilliseconds;
-
+    private final long ACCESS_TOKEN_VALIDITY_SECONDS;
+    private final long REFRESH_TOKEN_VALIDITY_SECONDS;
+    private final String COOKIE_REFRESH_TOKEN_KEY;
+    private static final String AUTHORITIES_KEY = "auth";
     private Key key;
+    private final MemberRepository memberRepository;
 
     public TokenProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.accessToken-validity-in-seconds}") long accessTokenValidityInSeconds,
-            @Value("${jwt.refreshToken-validity-in-seconds}") long refreshTokenValidityInSeconds,
-            RefreshTokenRepository refreshTokenRepository) {
+            @Value("${jwt.accessToken-validity-in-seconds}") long ACCESS_TOKEN_VALIDITY_SECONDS,
+            @Value("${jwt.refreshToken-validity-in-seconds}") long REFRESH_TOKEN_VALIDITY_SECONDS,
+            @Value("${app.auth.token.refresh-cookie-key}") String cookieKey,
+            MemberRepository memberRepository) {
         this.secret = secret;
-        this.accessTokenValidityInMilliseconds = accessTokenValidityInSeconds * 1000;
-        this.refreshTokenValidityInMilliseconds = refreshTokenValidityInSeconds * 1000;
-        this.refreshTokenRepository = refreshTokenRepository;
+        this.ACCESS_TOKEN_VALIDITY_SECONDS = ACCESS_TOKEN_VALIDITY_SECONDS * 1000;
+        this.REFRESH_TOKEN_VALIDITY_SECONDS = REFRESH_TOKEN_VALIDITY_SECONDS * 1000;
+        this.COOKIE_REFRESH_TOKEN_KEY = cookieKey;
+        this.memberRepository = memberRepository;
     }
 
     @Override
@@ -63,47 +66,52 @@ public class TokenProvider implements InitializingBean {
     /**
      *Authentication(유저 정보) 객체의 권한 정보를 이용해서 토큰을 생성하는 역할
      */
-    public TokenDto createToken(Authentication authentication) {
+    public String createAccessToken(Authentication authentication) {
         // 권한 가져오는 작업
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        long now = (new Date()).getTime();
-        // Access Token 생성
-        Date accessTokenExpiration = new Date(now + this.accessTokenValidityInMilliseconds);
-        String accessToken = Jwts.builder()
+        Date now = new Date();
+        Date accessTokenExpiration = new Date(now.getTime() + this.ACCESS_TOKEN_VALIDITY_SECONDS);
+        return Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
                 .signWith(key, SignatureAlgorithm.HS512)
+                .setIssuedAt(now)
                 .setExpiration(accessTokenExpiration)
                 .compact();
 
-        // Refresh Token 생성
-        Date refreshTokenExpiration = new Date(now + this.refreshTokenValidityInMilliseconds);
+    }
+    // Refresh Token 생성
+    public void createRefreshToken(Authentication authentication, HttpServletResponse response) {
+        Date now = new Date();
+        Date refreshTokenExpiration = new Date(now.getTime() + this.REFRESH_TOKEN_VALIDITY_SECONDS);
         String refreshToken = Jwts.builder()
+                .setIssuedAt(now)
                 .setExpiration(refreshTokenExpiration)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
 
-        // Refresh Token을 DB에 저장
-        RefreshToken refresh = RefreshToken.builder()
-                .tokenValue(refreshToken)
-                .memberName(authentication.getName())
-                .build();
-        // 요청한 권한 정보를 갖는 회원의 refresh 토큰이 DB에 이미 존재하면 삭제 후 새롭게 저장한다.
-        if (refreshTokenRepository.existsByMemberName(authentication.getName())) {
-            refreshTokenRepository.deleteByMemberName(authentication.getName());
-            refreshTokenRepository.save(refresh);
-        } else {
-            refreshTokenRepository.save(refresh);
-        }
+        saveRefreshToken(authentication, refreshToken);
 
-        return TokenDto.builder()
-                .grantType("Bearer")
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+        ResponseCookie cookie = ResponseCookie.from(COOKIE_REFRESH_TOKEN_KEY, refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .maxAge(REFRESH_TOKEN_VALIDITY_SECONDS / 1000)
+                .path("/")
                 .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
+
+
+    private void saveRefreshToken(Authentication authentication, String refreshToken) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        Long id = Long.valueOf(user.getName());
+
+        memberRepository.updateRefreshToken(id, refreshToken);
     }
 
 
@@ -129,8 +137,7 @@ public class TokenProvider implements InitializingBean {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        // User 객체를 만들어서 Authentication을 반환. User는 UserDetails 인터페이스를 구현
-        User principal = new User(claims.getSubject(), "", authorities);
+        CustomUserDetails principal = new CustomUserDetails(Long.valueOf(claims.getSubject()), "", authorities);
         // credential은 유저의 password를 의미하는듯?
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
@@ -139,66 +146,20 @@ public class TokenProvider implements InitializingBean {
     /**
      * 토큰의 유효성 검증을 수행하는 validateToken 메소드
      */
-    public boolean validateAccessToken(TokenDto token) {
+    public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token.getAccessToken());
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
             log.info("만료된 Access 토큰입니다.");
-
         } catch (UnsupportedJwtException e) {
             log.info("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalArgumentException e) {
             log.info("JWT 토큰이 잘못되었습니다.");
         }
         return false;
-    }
-
-
-    public boolean validateRefreshToken(String refreshToken) {
-
-        try {
-            // refreshToken 검증
-            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(refreshToken);
-            return true;
-
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
-        } catch (ExpiredJwtException e) {
-            log.info("만료된 refresh 토큰입니다.");
-        } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.");
-        } catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
-        }
-        return false;
-    }
-
-
-
-    public String recreateAccessToken(Member member) {
-//        Claims claims = Jwts.claims().setSubject(memberName);
-//        claims.put("auth", auth);
-
-        String authorities = member.getAuthorities().stream()
-                .map(Authority::getAuthorityName)
-                .collect(Collectors.joining(","));
-
-        Date now = new Date();
-        // Access 토큰 생성
-        String accessToken = Jwts.builder()
-                .setSubject(member.getMemberName())
-                .claim(AUTHORITIES_KEY, authorities)
-                .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(new Date(now.getTime() + accessTokenValidityInMilliseconds))
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
-
-
-        return accessToken;
-
     }
 
 
