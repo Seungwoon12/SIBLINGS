@@ -1,7 +1,11 @@
 <template>
-    <GoogleLogin :params="params" :callback="callback">
-        <span>구글 로그인</span>
-    </GoogleLogin>
+    <div>
+        <h2>로그인</h2>
+        <input type="text" placeholder="ID">
+        <input type="password" placeholder="PW">
+
+        <div @click="googleLogin" style="cursor">구글로 로그인하기</div>
+    </div>
 </template>
 
 <script>
@@ -15,9 +19,10 @@ export default {
         }
     },
     methods:{
-        callback(googleUser){
-            console.log(googleUser);
-        },
+        googleLogin(){
+            let backendUrl = process.env.VUE_APP_BACKEND_URL + "/oauth2/authorization/google?redirect_uri=" + process.env.VUE_APP_REDIRECT_URI;
+            this.$router.go(backendUrl);
+        }
     }
 }
 </script>
