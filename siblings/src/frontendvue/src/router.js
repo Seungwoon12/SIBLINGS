@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import MyPage from "./components/MyPage.vue";
-import Redirect from "./components/Redirect.vue";
 import Index from "./components/Index.vue";
+import Redirect from "./components/Redirect.vue";
 
 const routes = [
     {
@@ -10,12 +10,12 @@ const routes = [
     },
     {
         path:"/oauth/redirect",
-        component : MyPage,
+        component : Redirect,
     },
-    // {
-    //     path:"/my",
-    //     component : MyPage,
-    // }
+    {
+        path:"/my",
+        component : MyPage,
+    }
 ];
 
 const router = createRouter({

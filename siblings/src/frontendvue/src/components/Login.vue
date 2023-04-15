@@ -1,7 +1,7 @@
 <template>
     <div>
         <h2>구글 로그인</h2>
-        <a :href="url1">구글로 로그인하기</a>
+        <a :href="google_url">구글로 로그인하기</a>
     </div>
 
     <div>
@@ -19,7 +19,7 @@ export default {
             params: {
                 client_id : process.env.VUE_APP_GOOGLE_CLIENT_ID
             },
-            url1 :  process.env.VUE_APP_BACKEND_URL + "/oauth2/authorization/google?redirect_uri=" + process.env.VUE_APP_REDIRECT_URI,
+            google_url :  process.env.VUE_APP_BACKEND_URL + "/oauth2/authorization/google?redirect_uri=" + process.env.VUE_APP_REDIRECT_URI,
             kakao_url : process.env.VUE_APP_BACKEND_URL + "/oauth2/authorization/kakao?redirect_uri=" + process.env.VUE_APP_REDIRECT_URI
         }
     },

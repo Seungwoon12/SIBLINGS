@@ -6,4 +6,6 @@ import axios from 'axios'
 let app = createApp(App);
 app.config.globalProperties.axios = axios;
 
-app.use(router).mount('#app')
+import store from './store.js'
+
+app.use(store).use(router).mount('#app')
