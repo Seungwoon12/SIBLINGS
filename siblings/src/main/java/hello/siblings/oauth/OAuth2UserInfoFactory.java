@@ -10,6 +10,8 @@ public class OAuth2UserInfoFactory {
         switch (authProvider) {
             case GOOGLE:
                 return new GoogleOAuth2UserInfo(attributes);
+            case KAKAO:
+                return new KakaoOAuth2UserInfo(attributes);
 
             default:
                 throw new IllegalArgumentException("Invalid Provider Type.");

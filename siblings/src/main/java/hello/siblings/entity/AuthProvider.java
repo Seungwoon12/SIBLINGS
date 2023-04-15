@@ -1,5 +1,6 @@
 package hello.siblings.entity;
 
 public enum AuthProvider {
-    GOOGLE
+    GOOGLE,
+    KAKAO
 }

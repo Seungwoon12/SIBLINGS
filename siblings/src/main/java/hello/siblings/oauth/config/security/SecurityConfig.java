@@ -59,7 +59,7 @@ public class SecurityConfig {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  //세션을 사용하지 않기 때문에 세션 설정을 STATELESS로 설정
 
                 .and()
-                    .csrf().disable() //토큰 방식을 사용하기 때문에 csrf 설정을 disable 처리
+                    .csrf().disable() //토큰 방식을 사용하기(stateless) 때문에 csrf 설정을 disable 처리. 서버에 인증정보를 저장하지 않기 때문에 굳이 필요 없음
                     .httpBasic().disable() // BASIC Auth off
                     .formLogin().disable()
                     .exceptionHandling()
