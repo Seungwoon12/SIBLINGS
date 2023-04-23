@@ -47,6 +47,7 @@ public class ItemController {
         item.setImageFiles(storeImageFiles);
         itemRepository.save(item);
 
+        //RedirectAttributes 사용으로 redirect시 데이터 전달 가능. addFlashAttribute 메소드를 사용하면 post형식으로 데이터 전달 가능.
         redirectAttributes.addAttribute("itemId", item.getId());
 
         return "redirect:/items/{itemId}";

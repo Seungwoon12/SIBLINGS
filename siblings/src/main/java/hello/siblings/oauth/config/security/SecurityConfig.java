@@ -1,9 +1,6 @@
 package hello.siblings.oauth.config.security;
 
-import hello.siblings.jwt.JwtAccessDeniedHandler;
-import hello.siblings.jwt.JwtAuthenticationEntryPoint;
-import hello.siblings.jwt.JwtAuthenticationFilter;
-import hello.siblings.jwt.TokenProvider;
+import hello.siblings.jwt.*;
 import hello.siblings.oauth.CustomOAuth2UserService;
 import hello.siblings.oauth.handler.OAuth2AuthenticationFailureHandler;
 import hello.siblings.oauth.handler.OAuth2AuthenticationSuccessHandler;
@@ -53,54 +50,55 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                    .cors() // CORS on
+                .cors() // CORS on
                 .and()
-                    .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  //세션을 사용하지 않기 때문에 세션 설정을 STATELESS로 설정
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  //세션을 사용하지 않기 때문에 세션 설정을 STATELESS로 설정
 
                 .and()
-                    .csrf().disable() //토큰 방식을 사용하기(stateless) 때문에 csrf 설정을 disable 처리. 서버에 인증정보를 저장하지 않기 때문에 굳이 필요 없음
-                    .httpBasic().disable() // BASIC Auth off
-                    .formLogin().disable()
-                    .exceptionHandling()
-                    .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 401
-                    .accessDeniedHandler(jwtAccessDeniedHandler) // 403
+                .csrf().disable() //토큰 방식을 사용하기(stateless) 때문에 csrf 설정을 disable 처리. 서버에 인증정보를 저장하지 않기 때문에 굳이 필요 없음
+                .httpBasic().disable() // BASIC Auth off
+                .formLogin().disable()
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 401
+                .accessDeniedHandler(jwtAccessDeniedHandler) // 403
 
                 .and()
-                    .authorizeRequests()//HttpServletRequest를 사용하는 요청들에 대해 접근 제한을 설정하겠다.
-                    .antMatchers("/h2-console/**").permitAll()
-                    .antMatchers("/oauth2/**", "/auth/**").permitAll()
-                    .antMatchers("/admin/**").hasRole("ADMIN")
-                    .anyRequest().authenticated() //나머지 요청들은 모두 인증을 받아야한다.
+                .authorizeRequests()//HttpServletRequest를 사용하는 요청들에 대해 접근 제한을 설정하겠다.
+                .antMatchers("/h2-console/**").permitAll()
+                .antMatchers("/oauth2/**", "/auth/**").permitAll()
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated() //나머지 요청들은 모두 인증을 받아야한다.
 
 
                 //h2-console을 위한 설정
                 .and()
-                    .headers()
-                    .frameOptions()
-                    .sameOrigin()
+                .headers()
+                .frameOptions()
+                .sameOrigin()
 
 
                 .and()
-                    .oauth2Login()
-                    .authorizationEndpoint()
-                    .baseUri("/oauth2/authorization") // /oauth2/authorization/{provider-id}
-                    .authorizationRequestRepository(cookieAuthorizationRequestRepository)
+                .oauth2Login()
+                .authorizationEndpoint()
+                .baseUri("/oauth2/authorization") // /oauth2/authorization/{provider-id}
+                .authorizationRequestRepository(cookieAuthorizationRequestRepository)
 
                 .and()
-                    .redirectionEndpoint()
-                    .baseUri("/*/oauth2/code/*") // /login/oauth2/code/{provider-id}
+                .redirectionEndpoint()
+                .baseUri("/*/oauth2/code/*") // /login/oauth2/code/{provider-id}
 
                 .and()
-                    .userInfoEndpoint()// OAuth 2 로그인 성공 이후 사용자 정보를 가져올 때의 설정들을 담당
-                    .userService(customOAuth2UserService) // 소셜 로그인 성공 시 후속 조치를 진행할 UserService 인터페이스의 구현체를 등록. 리소스 서버(즉, 소셜 서비스들)에서 사용자 정보를 가져온 상태에서 추가로 진행하고자 하는 기능을 명시할 수 있음
+                .userInfoEndpoint()// OAuth 2 로그인 성공 이후 사용자 정보를 가져올 때의 설정들을 담당
+                .userService(customOAuth2UserService) // 소셜 로그인 성공 시 후속 조치를 진행할 UserService 인터페이스의 구현체를 등록. 리소스 서버(즉, 소셜 서비스들)에서 사용자 정보를 가져온 상태에서 추가로 진행하고자 하는 기능을 명시할 수 있음
 
                 .and()
-                    .successHandler(authenticationSuccessHandler)
-                    .failureHandler(authenticationFailureHandler)
+                .successHandler(authenticationSuccessHandler)
+                .failureHandler(authenticationFailureHandler)
 
                 .and()
-                    .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtExceptionFilter(), JwtAuthenticationFilter.class) // JwtAuthenticationFilter에서 exception 발생하면 JwtExceptionFilter가 처리하기 위함
 
                 .build();
     }
