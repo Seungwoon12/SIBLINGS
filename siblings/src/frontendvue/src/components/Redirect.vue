@@ -18,10 +18,8 @@ export default {
             }
         })
         .then(res=>{
-                console.log("리다이렉트");
-                console.log(res.data);
                 this.$store.commit("saveInfo", res.data);
-                this.$router.push('/my');
+                this.$router.push('/');
         })
         .catch(err=>{
             console.log("에러 : "+err);});

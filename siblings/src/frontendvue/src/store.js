@@ -1,9 +1,11 @@
 import {createStore} from 'vuex';
+import createPersistedState from 'vuex-persistedstate';
 
 const store = createStore({
     state(){
         return{
             infoObj : {},
+            loginYn : false,
         }
     },
     getters:{
@@ -14,8 +16,12 @@ const store = createStore({
     mutations : {
         saveInfo(state, data){
             state.infoObj = data;
+            state.loginYn = true;
         }
-    }
+    },
+    plugins: [
+        createPersistedState()
+    ]
 })
 
 export default store;

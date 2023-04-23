@@ -1,24 +1,24 @@
 <template>
   <div>
-    <nav-bar @openLoginPop="openLoginPop"/>
-    <login v-if="isLoginPopOpen" />
+    <nav-bar />
+    <router-view />
   </div>
 </template>
 
 <script>
-import Login from './Login.vue'
-import NavBar from './NavBar.vue'
+import NavBar from './NavBar.vue';
 export default {
-  components: { NavBar, Login },
+  name : "Index",
+  components:{
+    NavBar
+  },
   data() {
     return{
-        isLoginPopOpen : false,
     }
   },
+  mounted(){
+  },
   methods:{
-    openLoginPop(){
-        this.isLoginPopOpen = true;
-    },
 
   }
 
